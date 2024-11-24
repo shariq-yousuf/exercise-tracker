@@ -11,7 +11,7 @@ app.use(express.static("public"))
 app.use(express.urlencoded({ extended: false }))
 
 app.get("/", (req, res) => {
-  res.sendFile(import.meta.dirname + "/views/index.html")
+  res.sendFile(process.cwd() + "/views/index.html")
 })
 
 app
