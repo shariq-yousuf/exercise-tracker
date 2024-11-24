@@ -1,8 +1,8 @@
 import express from "express"
 import cors from "cors"
-import { nanoid } from "nanoid"
 import dotenv from "dotenv"
 dotenv.config()
+import db from "./model/model.js"
 
 const app = express()
 
@@ -14,25 +14,36 @@ app.get("/", (req, res) => {
   res.sendFile(import.meta.dirname + "/views/index.html")
 })
 
-const users = []
-
 app
   .route("/api/users")
   .post((req, res) => {
     const username = req.body.username
-    const _id = nanoid()
 
-    const user = {
-      username,
-      _id,
-    }
-    users.push(user)
-
-    res.json(user)
+    db()
+      .then(({ addNewUser }) => addNewUser(username))
+      .then((user) => res.json(user))
+      .catch((err) => res.json(err))
   })
   .get((req, res) => {
-    res.json(users)
+    db()
+      .then(({ getAllUsers }) => getAllUsers())
+      .then((users) => res.json(users))
+      .catch((err) => res.json(err))
   })
+
+app.post("/api/users/:_id/exercises", (req, res) => {
+  db()
+    .then(({ addExercise }) => addExercise(req.params._id, req.body))
+    .then((data) => res.json(data))
+    .catch((err) => res.json(err))
+})
+
+app.get("/api/users/:_id/logs", (req, res) => {
+  db()
+    .then(({ getUser }) => getUser(req.params._id, req.query))
+    .then((userLog) => res.json(userLog))
+    .catch((err) => res.json(err))
+})
 
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log("Your app is listening on port " + listener.address().port)
